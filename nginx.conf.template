@@ -1,0 +1,35 @@
+server {
+    listen 80;
+    server_name kpsucai.cn 8.140.222.12; # 替换为您实际的域名和IP
+
+    client_max_body_size 500m;  # 允许最大 500MB 上传
+
+    # 1. 前端静态文件代理 (React/Vite Build 产物)
+    location / {
+        root /opt/website_test/frontend/dist; # Vite build 后的产物目录
+        index index.html;
+        try_files $uri $uri/ /index.html;      # 解决 React 单页应用前端路由 404 问题
+    }
+
+    # 2. 后端 API 接口反向代理
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080/api/;  # 转发给本地的 Go 后端
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 3. 仅公开带水印预览图，原始素材经后端接口鉴权下载。
+    location ^~ /uploads/previews/ {
+        alias /opt/data/uploads/previews/;
+        expires 30d;                          # 浏览器缓存 30 天
+        add_header Cache-Control "public";
+        access_log off;                       # 关闭静态资源访问日志提升性能
+    }
+
+    # 拒绝直接访问原始文件及上传目录的其他路径。
+    location /uploads/ {
+        return 404;
+    }
+}

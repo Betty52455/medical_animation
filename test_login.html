@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Test</title>
+  </head>
+  <body>
+    <h1>Login Test</h1>
+    <input type="text" id="username" placeholder="Username" value="admin" />
+    <input
+      type="password"
+      id="password"
+      placeholder="Password"
+    />
+    <button onclick="login()">Login</button>
+    <pre id="result"></pre>
+
+    <script>
+      // login 使用手动输入的本地测试账号验证登录接口，不内置任何密码。
+      async function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const resultPre = document.getElementById("result");
+
+        try {
+          const response = await fetch("http://localhost:8080/api/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await response.json();
+          resultPre.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          resultPre.textContent = "Error: " + error.message;
+        }
+      }
+    </script>
+  </body>
+</html>
