@@ -1,0 +1,10 @@
+# 数据库备份日志每周轮转；数据库和备份文件不属于日志清理范围。
+/opt/data/website_db_backup/backup.log {
+    weekly
+    rotate 8
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0600 root root
+}

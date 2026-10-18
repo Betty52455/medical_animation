@@ -1,0 +1,70 @@
+/* ==================== 全局样式重置 ==================== */
+/* 整体风格：全宽布局、淡蓝色背景 */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+  background-color: #f0f5ff; /* 淡蓝色背景，与参考站一致 */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  width: 100%;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ==================== Ant Design 覆盖 ==================== */
+/* 让 Ant Layout 使用全宽 */
+.ant-layout {
+  background: transparent !important;
+}
+
+.ant-layout-header {
+  background: #fff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.ant-layout-content {
+  background: transparent !important;
+}
+
+.ant-layout-footer {
+  background: transparent !important;
+}
+
+/* ========== 视频控件：隐藏全屏和画中画按钮（防止绕过水印） ========== */
+video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+}
+video::-webkit-media-controls-picture-in-picture-button {
+  display: none !important;
+}
+video::--media-controls-fullscreen-button {
+  display: none !important;
+}

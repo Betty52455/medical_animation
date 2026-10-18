@@ -1,0 +1,32 @@
+# 托管正式后端二进制，日志由 journalctl -u kpsucai 查看。
+[Unit]
+Description=KPSucai materials backend
+After=network.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/website_test/backend
+Environment=GIN_MODE=release
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStartPre=/opt/website_test/deploy/check_database.sh
+ExecStart=/opt/website_test/backend/server
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillMode=control-group
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kpsucai
+# 后端只需写入持久化数据和临时目录，禁止改写代码和系统目录。
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/data
+UMask=0022
+
+[Install]
+WantedBy=multi-user.target

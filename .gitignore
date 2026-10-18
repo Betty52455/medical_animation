@@ -1,0 +1,52 @@
+# === 前端 ===
+frontend/node_modules/
+frontend/dist/
+frontend/frontend.log
+frontend/frontend_pid
+frontend/frontend_run.log
+
+# === 后端 ===
+backend/backend.log
+backend/backend_pid
+backend/backend_run.log
+
+# === 日志和临时文件 ===
+*.log
+*_pid
+frontend.log
+frontend_pid
+
+# === 系统文件 ===
+.DS_Store
+Thumbs.db
+
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# === 压缩包 ===
+*.zip
+*.tar.gz
+
+# 实际配置、开发数据、发布快照只保存在对应机器。
+backend/config.json
+.env
+.env.*
+!.env.example
+.local-data/
+.deploy/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.sqlite
+*.sqlite3
+backend/uploads/originals/*
+!backend/uploads/originals/.gitkeep
+backend/uploads/previews/*
+!backend/uploads/previews/.gitkeep
+*.pem
+*.key

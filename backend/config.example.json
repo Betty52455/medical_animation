@@ -1,0 +1,10 @@
+{
+  "admin": {
+    "username": "admin",
+    "password": ""
+  },
+  "database_path": "/opt/data/kpsucai.db",
+  "upload_dir": "/opt/data/uploads",
+  "jwt_secret": "",
+  "server_port": "127.0.0.1:8080"
+}
