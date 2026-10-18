@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """用临时数据运行真实后端，验证注册、上传路径、预览及鉴权下载。"""
 import json
+import os
 from pathlib import Path
 import secrets
 import socket
 import sqlite3
 import struct
 import subprocess
+import sys
 import tempfile
 import time
 import urllib.error
@@ -81,6 +83,14 @@ def verify(base, config):
 def main():
     """构建临时二进制，以随机端口/凭据运行，结束后清理本次进程和测试数据。"""
     root = Path(__file__).resolve().parents[1]
+    if sys.platform == "darwin":
+        for prefix in ("/opt/homebrew/opt/ffmpeg-full", "/usr/local/opt/ffmpeg-full"):
+            if (Path(prefix) / "bin/ffmpeg").is_file():
+                os.environ["PATH"] = prefix + "/bin:" + os.environ.get("PATH", "")
+                break
+    filters = subprocess.check_output(["ffmpeg", "-hide_banner", "-filters"], stderr=subprocess.DEVNULL)
+    if b"drawtext" not in filters:
+        raise RuntimeError("ffmpeg lacks drawtext; install ffmpeg-full as described in the usage guide")
     with tempfile.TemporaryDirectory(prefix="kpsucai-smoke-") as directory:
         work = Path(directory)
         binary = work / "server"
