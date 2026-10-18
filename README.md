@@ -64,8 +64,7 @@ doc/                       使用说明、运维说明和验证记录
 git clone https://github.com/dugenkui03/medical_animation.git
 cd medical_animation
 python3 scripts/init_local.py
-cd backend
-go run ./cmd/server/
+bash scripts/dev_backend.sh
 ```
 
 另开终端：

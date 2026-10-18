@@ -12,12 +12,20 @@ import (
 )
 
 // getFontPath 根据操作系统自动选择可用的中文字体路径
-// macOS: 使用系统自带的 PingFang 字体
+// macOS: 按存在性选择 PingFang 或系统自带的黑体，兼容字体位置变化。
 // Linux: 优先使用文泉驿微米黑 → Noto Sans CJK → DejaVu Sans 兜底
 func getFontPath() string {
 	if runtime.GOOS == "darwin" {
-		// macOS 系统字体
-		return "/System/Library/Fonts/PingFang.ttc"
+		for _, p := range []string{
+			"/System/Library/Fonts/PingFang.ttc",
+			"/System/Library/Fonts/STHeiti Medium.ttc",
+			"/System/Library/Fonts/STHeiti Light.ttc",
+			"/Library/Fonts/Arial Unicode.ttf",
+		} {
+			if _, err := os.Stat(p); err == nil {
+				return p
+			}
+		}
 	}
 
 	// Linux 常见中文字体路径（按优先级排列）
