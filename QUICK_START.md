@@ -5,7 +5,7 @@
 ## 1. 本地检查、提交和推送
 
 ```bash
-cd /Users/dugenkui/workspace/medical_animation
+cd /path/to/medical_animation
 git pull --ff-only origin main
 # 完成需要的本地修改后：
 bash scripts/check.sh

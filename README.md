@@ -10,7 +10,7 @@
 - [服务器运维与故障恢复](doc/服务器运维与故障恢复.md)：备份、证书、监控和数据库恢复。
 - [2026-10-18 运维验证快照](doc/运维验证记录_20261018.json)：当次维护证据，不代表后续实时状态。
 
-仓库：[dugenkui03/medical_animation](https://github.com/dugenkui03/medical_animation)（私有）；正式分支：`main`；网站：[kpsucai.cn](https://kpsucai.cn)。
+仓库：[Betty52455/medical_animation](https://github.com/Betty52455/medical_animation)（公开）；正式分支：`main`；网站：[kpsucai.cn](https://kpsucai.cn)。
 
 ## 开发与部署链路
 
@@ -19,7 +19,7 @@ flowchart LR
     subgraph local["本地开发"]
         A["① 修改源码与脚本"] --> B["② 检查并提交"]
     end
-    subgraph repo["GitHub 私有仓库"]
+    subgraph repo["GitHub 公开仓库"]
         C["③ push main"]
     end
     subgraph server["阿里云服务器"]
@@ -61,7 +61,7 @@ doc/                       使用说明、运维说明和验证记录
 安装 Go、Node.js、Python 3、ffmpeg 及 C 编译工具后：
 
 ```bash
-git clone https://github.com/dugenkui03/medical_animation.git
+git clone https://github.com/Betty52455/medical_animation.git
 cd medical_animation
 python3 scripts/init_local.py
 bash scripts/dev_backend.sh

@@ -10,7 +10,7 @@ A materials (素材) distribution platform called "趣味科普网" where users 
 
 ## Development and deployment policy
 
-- Repository: `https://github.com/dugenkui03/medical_animation`, production branch `main`.
+- Repository: `https://github.com/Betty52455/medical_animation`, production branch `main`.
 - Develop and validate on the local machine, commit and push there; the server pulls code and runs the official deployment script. Do not edit business source directly on the server.
 - Read `doc/项目使用说明.md` before deployment. Local check: `bash scripts/check.sh`; server update: `bash deploy/update.sh` from `/opt/website_test`.
 - Commit source, scripts, service templates and documentation. Never commit `backend/config.json`, passwords, private keys, databases, uploads or deployment snapshots.
