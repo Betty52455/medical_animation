@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
+	"unicode/utf8"
 	"website_test/internal/database"
 	"website_test/internal/models"
 	"website_test/internal/utils"
@@ -25,6 +27,7 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// Register 校验用户名和密码，并只为符合新规则的账户生成密码哈希。
 func Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -41,6 +44,10 @@ func Register(c *gin.Context) {
 	matched, _ := regexp.MatchString(`^[a-zA-Z][a-zA-Z0-9_\p{Han}]*$`, req.Username)
 	if !matched {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "用户名必须以字母开头，只能包含字母、数字、下划线或中文"})
+		return
+	}
+	if issue := validateRegistrationPassword(req.Username, req.Password); issue != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": issue, "field": "password"})
 		return
 	}
 
@@ -72,6 +79,91 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "注册成功"})
 }
 
+// validateRegistrationPassword 拒绝过短、超出 bcrypt 限制和明显可猜测的密码。
+func validateRegistrationPassword(username, password string) string {
+	if utf8.RuneCountInString(password) < 15 {
+		return "密码至少需要15个字符，建议使用一段容易记住的长短语"
+	}
+	if len([]byte(password)) > 72 {
+		return "密码的 UTF-8 编码不能超过72字节，请缩短后重试"
+	}
+
+	lower := strings.ToLower(password)
+	name := strings.ToLower(username)
+	if utf8.RuneCountInString(name) >= 3 && strings.Contains(lower, name) {
+		return "密码不能包含用户名，请换一段不相关的长短语"
+	}
+	if hasPredictablePattern([]rune(lower)) {
+		return "密码不能使用连续字符、重复字符或重复片段"
+	}
+	commonLongPasswords := map[string]bool{
+		"password12345678":  true,
+		"password123456789": true,
+		"qwerty123456789":   true,
+		"qwertyuiop123456":  true,
+		"iloveyou12345678":  true,
+		"letmein123456789":  true,
+	}
+	if commonLongPasswords[lower] {
+		return "这个密码太常见，请换一段不容易被猜到的长短语"
+	}
+	return ""
+}
+
+// hasPredictablePattern 识别少量字符拼凑、短片段循环及连续数字或字母。
+func hasPredictablePattern(chars []rune) bool {
+	unique := make(map[rune]bool)
+	for _, char := range chars {
+		unique[char] = true
+	}
+	if len(unique) <= 2 {
+		return true
+	}
+
+	for period := 1; period <= len(chars)/2; period++ {
+		repeated := true
+		for index, char := range chars {
+			if char != chars[index%period] {
+				repeated = false
+				break
+			}
+		}
+		if repeated {
+			return true
+		}
+	}
+	return isSequentialPassword(chars)
+}
+
+// isSequentialPassword 识别可循环的升序和降序数字、英文字母序列。
+func isSequentialPassword(chars []rune) bool {
+	for _, alphabet := range []string{"0123456789", "abcdefghijklmnopqrstuvwxyz"} {
+		letters := []rune(alphabet)
+		for _, direction := range []int{1, -1} {
+			start := strings.IndexRune(alphabet, chars[0])
+			if start < 0 {
+				continue
+			}
+			matches := true
+			for index, char := range chars {
+				position := (start + direction*index) % len(letters)
+				if position < 0 {
+					position += len(letters)
+				}
+				if char != letters[position] {
+					matches = false
+					break
+				}
+			}
+			if matches {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// Login 对不存在的账号和错误密码返回相同提示，避免暴露账号是否存在。
 func Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -86,7 +178,7 @@ func Login(c *gin.Context) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户名或密码错误"})
 		return
 	}
 

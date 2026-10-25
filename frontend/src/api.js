@@ -14,13 +14,18 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
+  // 登录和注册自己的 401 应交给页面展示，只有受保护接口的 401 才清除会话。
   (error) => {
     if (error.response) {
-      if (error.response.status === 401) {
+      const isAuthRequest = error.config?.url?.startsWith('/auth/');
+      if (error.response.status === 401 && !isAuthRequest) {
         // Token 过期或无效，清除本地存储并重定向到登录页
-        localStorage.clear();
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        const loginPath = window.location.pathname.startsWith('/admin') ? '/admin-login' : '/login';
+        if (window.location.pathname !== loginPath) {
+          window.location.href = loginPath;
         }
       } else if (error.response.status === 403) {
         // 权限不足 - 当前用户不是管理员
