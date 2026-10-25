@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Statistic, Radio, Table, Tag, Typography, message, Spin } from 'antd';
-import { UserOutlined, CloudDownloadOutlined, FileOutlined, WalletOutlined, TeamOutlined, RiseOutlined } from '@ant-design/icons';
+import { UserOutlined, CloudDownloadOutlined, FileOutlined, WalletOutlined, TeamOutlined, RiseOutlined, LineChartOutlined, PieChartOutlined, FireOutlined, GlobalOutlined } from '@ant-design/icons';
 import { Line, Pie } from '@ant-design/charts';
 import api from '../api';
 
@@ -171,7 +171,7 @@ const StatsPanel = () => {
         },
     ];
 
-    // ==================== 卡片样式 ====================
+    // 无描边的工作台图表样式由站点样式统一控制。
     const cardStyle = { marginBottom: 16 };
 
     return (
@@ -186,43 +186,43 @@ const StatsPanel = () => {
             </div>
 
             {/* 概览卡片 */}
-            <Row gutter={16} style={{ marginBottom: 16 }}>
-                <Col span={4}>
-                    <Card bordered={false} style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                        <Statistic title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>总用户数</span>} value={overview.total_users || 0} prefix={<TeamOutlined />} valueStyle={{ color: '#fff' }} />
+            <Row gutter={[16, 16]} className="stats-overview" style={{ marginBottom: 16 }}>
+                <Col xs={12} md={8} xl={4}>
+                    <Card>
+                        <Statistic title="总用户数" value={overview.total_users || 0} prefix={<TeamOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
-                    <Card bordered={false} style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-                        <Statistic title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>今日新增</span>} value={overview.today_new_users || 0} prefix={<UserOutlined />} valueStyle={{ color: '#fff' }} />
+                <Col xs={12} md={8} xl={4}>
+                    <Card>
+                        <Statistic title="今日新增" value={overview.today_new_users || 0} prefix={<UserOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
-                    <Card bordered={false} style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-                        <Statistic title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>今日活跃</span>} value={overview.today_active_users || 0} prefix={<RiseOutlined />} valueStyle={{ color: '#fff' }} />
+                <Col xs={12} md={8} xl={4}>
+                    <Card>
+                        <Statistic title="今日活跃" value={overview.today_active_users || 0} prefix={<RiseOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
-                    <Card bordered={false} style={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' }}>
-                        <Statistic title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>素材总量</span>} value={overview.total_materials || 0} prefix={<FileOutlined />} valueStyle={{ color: '#fff' }} />
+                <Col xs={12} md={8} xl={4}>
+                    <Card>
+                        <Statistic title="素材总量" value={overview.total_materials || 0} prefix={<FileOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
-                    <Card bordered={false} style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
-                        <Statistic title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>今日下载</span>} value={overview.today_downloads || 0} prefix={<CloudDownloadOutlined />} valueStyle={{ color: '#fff' }} />
+                <Col xs={12} md={8} xl={4}>
+                    <Card>
+                        <Statistic title="今日下载" value={overview.today_downloads || 0} prefix={<CloudDownloadOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
-                    <Card bordered={false} style={{ background: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' }}>
-                        <Statistic title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>积分池余额</span>} value={overview.total_points || 0} prefix={<WalletOutlined />} valueStyle={{ color: '#fff' }} />
+                <Col xs={12} md={8} xl={4}>
+                    <Card>
+                        <Statistic title="积分池余额" value={overview.total_points || 0} prefix={<WalletOutlined />} />
                     </Card>
                 </Col>
             </Row>
 
             {/* 用户趋势 + 积分趋势 */}
-            <Row gutter={16}>
-                <Col span={12}>
-                    <Card title="👤 用户趋势" style={cardStyle}>
+            <Row gutter={[16, 16]}>
+                <Col xs={24} xl={12}>
+                    <Card title={<><UserOutlined /> 用户趋势</>} style={cardStyle}>
                         {userChartData.length > 0 ? (
                             <Line {...lineConfig(userChartData, '')} />
                         ) : (
@@ -230,8 +230,8 @@ const StatsPanel = () => {
                         )}
                     </Card>
                 </Col>
-                <Col span={12}>
-                    <Card title="💰 积分趋势" style={cardStyle}>
+                <Col xs={24} xl={12}>
+                    <Card title={<><WalletOutlined /> 积分趋势</>} style={cardStyle}>
                         {pointsChartData.length > 0 ? (
                             <Line {...lineConfig(pointsChartData, '')} />
                         ) : (
@@ -242,9 +242,9 @@ const StatsPanel = () => {
             </Row>
 
             {/* 素材下载趋势 + 类型分布 */}
-            <Row gutter={16}>
-                <Col span={16}>
-                    <Card title="📁 素材下载趋势" style={cardStyle}>
+            <Row gutter={[16, 16]}>
+                <Col xs={24} xl={16}>
+                    <Card title={<><LineChartOutlined /> 素材下载趋势</>} style={cardStyle}>
                         {dlChartData.length > 0 ? (
                             <Line {...lineConfig(dlChartData, '')} />
                         ) : (
@@ -252,8 +252,8 @@ const StatsPanel = () => {
                         )}
                     </Card>
                 </Col>
-                <Col span={8}>
-                    <Card title="📊 素材类型分布" style={cardStyle}>
+                <Col xs={24} xl={8}>
+                    <Card title={<><PieChartOutlined /> 素材类型分布</>} style={cardStyle}>
                         {pieData.length > 0 ? (
                             <Pie
                                 data={pieData}
@@ -272,9 +272,9 @@ const StatsPanel = () => {
             </Row>
 
             {/* 热门素材排行 + 登录记录 */}
-            <Row gutter={16}>
-                <Col span={12}>
-                    <Card title="🔥 热门素材 TOP 10" style={cardStyle}>
+            <Row gutter={[16, 16]}>
+                <Col xs={24} xl={12}>
+                    <Card title={<><FireOutlined /> 热门素材 TOP 10</>} style={cardStyle}>
                         <Table
                             dataSource={materialTrend.top}
                             columns={topColumns}
@@ -284,8 +284,8 @@ const StatsPanel = () => {
                         />
                     </Card>
                 </Col>
-                <Col span={12}>
-                    <Card title="🌐 登录记录" style={cardStyle}>
+                <Col xs={24} xl={12}>
+                    <Card title={<><GlobalOutlined /> 登录记录</>} style={cardStyle}>
                         <Table
                             dataSource={loginRecords}
                             columns={loginColumns}
