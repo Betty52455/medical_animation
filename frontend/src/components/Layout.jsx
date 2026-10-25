@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Input, Button, Avatar, Dropdown, Space, message, Modal, Tag, Table } from 'antd';
-import { UserOutlined, LogoutOutlined, UploadOutlined, GiftOutlined, WalletOutlined, HistoryOutlined, DownloadOutlined } from '@ant-design/icons';
+import { UserOutlined, LogoutOutlined, UploadOutlined, GiftOutlined, WalletOutlined, HistoryOutlined, DownloadOutlined, NotificationOutlined } from '@ant-design/icons';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import api from '../api';
 
@@ -70,16 +70,21 @@ const AppLayout = () => {
         }
     }, [user]);
 
+    // handleLogout 只清除本站登录状态，避免删除其他本地设置。
     const handleLogout = () => {
-        localStorage.clear();
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
         setUser(null);
         setPoints(0);
         message.success('已退出登录');
         navigate('/login');
     };
 
+    // handleSearch 提交完整关键词后更新地址，避免输入每个字符都重新加载素材。
     const handleSearch = (value) => {
-        navigate(`/?q=${value}`);
+        const query = value.trim();
+        navigate(query ? `/?q=${encodeURIComponent(query)}` : '/');
     };
 
     // 兑换积分码
@@ -188,63 +193,62 @@ const AppLayout = () => {
     ];
 
     return (
-        <Layout style={{ minHeight: '100vh' }}>
+        <Layout className="site-layout" style={{ minHeight: '100vh' }}>
             {/* 公告横幅 */}
-            <div style={{ background: '#fffbe6', padding: '10px', textAlign: 'center', color: '#d46b08', borderBottom: '1px solid #ffe58f' }}>
-                {announcementText}
+            <div className="site-announcement">
+                <NotificationOutlined aria-hidden="true" /> <span>{announcementText}</span>
             </div>
 
-            <Header style={{ background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', boxShadow: '0 2px 8px #f0f1f2' }}>
-                <div className="logo" style={{ fontSize: '20px', fontWeight: 'bold', marginRight: '40px' }}>
-                    <Link to="/" style={{ color: '#333' }}>趣味科普网</Link>
+            <Header className="site-header">
+                <div className="site-logo">
+                    <Link to="/" viewTransition>趣味<span>/</span>科普</Link>
                 </div>
 
-                <div style={{ flex: 1, maxWidth: '600px', margin: '0 20px' }}>
+                <div className="site-search">
                     <Search
-                        placeholder="搜索素材..."
+                        placeholder="搜索角色、场景或素材"
                         allowClear
                         onSearch={handleSearch}
-                        onChange={(e) => handleSearch(e.target.value)}
                         enterButton
                     />
                 </div>
 
-                <div className="user-actions">
+                <div className="site-actions">
                     <Space size="middle">
                         {/* 联系客服按钮 - 放在头像左侧 */}
-                        <Button type="text" onClick={handleOpenContact}>联系客服</Button>
+                        <Button className="site-contact" type="text" onClick={handleOpenContact}>联系客服</Button>
 
                         {user ? (
                             <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
-                                <Space style={{ cursor: 'pointer' }}>
+                                <Space className="site-user-trigger" style={{ cursor: 'pointer' }}>
                                     <Avatar icon={<UserOutlined />} />
-                                    <span>{user.username}</span>
+                                    <span className="site-username">{user.username}</span>
                                     {/* 顶栏积分标签 */}
-                                    <Tag color="blue" style={{ marginLeft: 4, fontSize: 12 }}>
+                                    <Tag color="blue" className="site-points" style={{ marginLeft: 4, fontSize: 12 }}>
                                         {points} 积分
                                     </Tag>
                                 </Space>
                             </Dropdown>
                         ) : (
                             <Space>
-                                <Link to="/login"><Button type="primary">登录</Button></Link>
+                                <Link to="/login" viewTransition><Button type="primary">登录</Button></Link>
                             </Space>
                         )}
                     </Space>
                 </div>
             </Header>
 
-            <Content style={{ padding: '20px 50px' }}>
+            <Content className="site-content">
                 <Outlet />
             </Content>
 
-            <Footer style={{ textAlign: 'center', color: '#999', fontSize: 13 }}>
-                趣味科普网 ©{new Date().getFullYear()} &nbsp;|&nbsp;
-                <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer" style={{ color: '#999' }}>
+            <Footer className="site-footer">
+                <strong>趣味 / 科普</strong>
+                <span>趣味科普网 ©{new Date().getFullYear()}</span>
+                <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">
                     津ICP备2026001988号-1
                 </a>
-                &nbsp;|&nbsp;
-                <a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=13040202001092" target="_blank" rel="noopener noreferrer" style={{ color: '#999' }}>
+                <a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=13040202001092" target="_blank" rel="noopener noreferrer">
                     冀公网安备13040202001092号
                 </a>
             </Footer>
