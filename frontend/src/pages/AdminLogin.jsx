@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, message } from 'antd';
-import { ArrowRightOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import React from 'react';
+import { Form, Input, Button, Card, message } from 'antd';
+import { LockOutlined, CrownOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import AuthShell from '../components/AuthShell';
 
-/** AdminLogin 通过同一个认证接口核对管理员角色后进入后台。 */
+/**
+ * 管理员专用登录页面
+ * 独立于普通用户登录，使用专属 URL: /admin-login
+ */
 const AdminLogin = () => {
     const navigate = useNavigate();
-    const [submitting, setSubmitting] = useState(false);
 
-    // onFinish 仅在服务端确认管理员角色后保存登录状态。
     const onFinish = async (values) => {
-        setSubmitting(true);
         try {
             const res = await api.post('/auth/login', values);
+            // 验证是否为管理员
             if (res.data.role !== 'admin') {
                 message.error('该账号不是管理员，无法登录管理后台');
                 return;
@@ -26,25 +26,61 @@ const AdminLogin = () => {
             navigate('/admin');
         } catch (err) {
             message.error(err.response?.data?.error || '登录失败');
-        } finally {
-            setSubmitting(false);
         }
     };
 
     return (
-        <AuthShell eyebrow="ADMIN / 02" title="管理后台" subtitle="使用管理员账号维护素材与网站内容">
-            <Form className="auth-form" name="admin_login" layout="vertical" requiredMark={false} onFinish={onFinish}>
-                <Form.Item label="管理员用户名" name="username" rules={[{ required: true, message: '请输入管理员用户名' }]}>
-                    <Input prefix={<UserOutlined />} placeholder="请输入管理员用户名" autoComplete="username" size="large" />
-                </Form.Item>
-                <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }]}>
-                    <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" autoComplete="current-password" size="large" />
-                </Form.Item>
-                <Button className="auth-submit" type="primary" htmlType="submit" loading={submitting} block size="large">
-                    进入后台 <ArrowRightOutlined />
-                </Button>
-            </Form>
-        </AuthShell>
+        <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        }}>
+            <Card
+                style={{
+                    width: 380,
+                    borderRadius: 12,
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                }}
+            >
+                <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                    <CrownOutlined style={{ fontSize: 48, color: '#faad14' }} />
+                    <h2 style={{ margin: '12px 0 4px', color: '#333' }}>管理后台登录</h2>
+                    <p style={{ color: '#999', fontSize: 13 }}>趣味科普网 · 管理员专用</p>
+                </div>
+
+                <Form name="admin_login" onFinish={onFinish}>
+                    <Form.Item
+                        name="username"
+                        rules={[{ required: true, message: '请输入管理员用户名' }]}
+                    >
+                        <Input
+                            prefix={<CrownOutlined style={{ color: '#faad14' }} />}
+                            placeholder="管理员用户名"
+                            size="large"
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        name="password"
+                        rules={[{ required: true, message: '请输入密码' }]}
+                    >
+                        <Input.Password
+                            prefix={<LockOutlined />}
+                            placeholder="密码"
+                            size="large"
+                        />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" size="large" block
+                            style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', border: 'none', height: 44 }}
+                        >
+                            登录管理后台
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Card>
+        </div>
     );
 };
 
