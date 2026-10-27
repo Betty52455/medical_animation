@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Pagination, Spin, message, Modal, Button } from 'antd';
-import { ArrowDownOutlined, CaretRightOutlined, DownloadOutlined, LeftOutlined, PauseOutlined, RightOutlined, LoginOutlined, CustomerServiceOutlined, FolderOutlined, SoundOutlined } from '@ant-design/icons';
+import { Pagination, Spin, Empty, message, Modal, Button } from 'antd';
+import { DownloadOutlined, LeftOutlined, RightOutlined, LoginOutlined, CustomerServiceOutlined, FolderOutlined } from '@ant-design/icons';
 import api from '../api';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
@@ -18,9 +18,9 @@ const PREVIEW_RATIO = 0.15;          // 视频预览：超出阈值只能看前 
  * Home 首页组件
  * 
  * 功能说明：
- * 1. 蓝色画报封面引导进入素材区
- * 2. 分类与搜索条件筛选素材，移动端网格自动缩列
- * 3. 素材卡片提供预览、积分与版权信息
+ * 1. 顶部：一级分类 Tab（人物、场景、表情包...）
+ * 2. 中间：二级分类胶囊按钮（都市人物、年代人物...）
+ * 3. 下方：素材 5 列网格，每张卡片带"版权"标签和标题
  * 4. 点击卡片：弹出 Modal 预览（图片显示水印大图 / 视频可播放）
  * 5. Modal 底部：下载按钮（未登录则提示去登录）
  * 6. 底部：分页
@@ -42,7 +42,6 @@ const Home = () => {
     // 预览弹窗状态
     const [previewVisible, setPreviewVisible] = useState(false);  // 弹窗是否显示
     const [previewIndex, setPreviewIndex] = useState(0);          // 当前预览的素材索引
-    const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
 
     // 加载分类数据
     useEffect(() => {
@@ -183,93 +182,69 @@ const Home = () => {
     const isLoggedIn = !!localStorage.getItem('token');
 
     return (
-        <div className="home-page">
-            <section className="home-hero" aria-labelledby="home-title">
-                <div className="home-hero-copy">
-                    <span className="home-kicker">SCIENCE MATERIALS / 01</span>
-                    <h1 id="home-title"><span>把知识</span><span>变得看得见</span></h1>
-                    <p>从角色到场景<br />寻找适合表达想法的科普素材</p>
-                    <a className="home-hero-action" href="#materials">探索素材 <ArrowDownOutlined /></a>
-                </div>
-                <div className="home-hero-art" aria-hidden="true">
-                    <span className="home-art-ring home-art-ring-one" />
-                    <span className="home-art-ring home-art-ring-two" />
-                    <span className="home-art-core" />
-                    <span className="home-art-caption">IDEAS IN MOTION</span>
-                </div>
-                <span className="home-hero-number" aria-hidden="true">01 / COVER</span>
-            </section>
-
-            <section className="home-library" id="materials" aria-labelledby="materials-title">
-                <div className="home-library-heading">
-                    <div>
-                        <span className="home-section-index">02 / RESOURCE LIBRARY</span>
-                        <h2 id="materials-title">探索素材</h2>
-                    </div>
-                    <p>按主题浏览<br />或在上方直接搜索</p>
-                </div>
+        <div style={{ padding: '0' }}>
             {/* ========== 一级分类 Tab 导航 ========== */}
-            <div className="home-categories" role="group" aria-label="素材分类">
+            <div style={styles.level1Bar}>
                 {categories.map(cat => (
-                    <button
+                    <div
                         key={cat.id}
-                        type="button"
-                        className={`home-category ${selectedLevel1 === String(cat.id) ? 'is-active' : ''}`}
-                        aria-pressed={selectedLevel1 === String(cat.id)}
+                        style={{
+                            ...styles.level1Tab,
+                            ...(selectedLevel1 === String(cat.id) ? styles.level1TabActive : {}),
+                        }}
                         onClick={() => handleLevel1Change(cat.id)}
                     >
                         {cat.name}
-                    </button>
+                    </div>
                 ))}
             </div>
 
             {/* ========== 二级分类标签行 ========== */}
             {subCategories.length > 0 && (
-                <div className="home-subcategories" role="group" aria-label="细分分类">
-                    <button
-                        type="button"
-                        className={`home-subcategory ${selectedLevel2 === '' ? 'is-active' : ''}`}
-                        aria-pressed={selectedLevel2 === ''}
+                <div style={styles.level2Bar}>
+                    <div
+                        style={{
+                            ...styles.level2Tag,
+                            ...(selectedLevel2 === '' ? styles.level2TagActive : {}),
+                        }}
                         onClick={() => { setSelectedLevel2(''); setPage(1); }}
                     >
                         全部
-                    </button>
+                    </div>
                     {subCategories.map(sub => (
-                        <button
+                        <div
                             key={sub.id}
-                            type="button"
-                            className={`home-subcategory ${selectedLevel2 === String(sub.id) ? 'is-active' : ''}`}
-                            aria-pressed={selectedLevel2 === String(sub.id)}
+                            style={{
+                                ...styles.level2Tag,
+                                ...(selectedLevel2 === String(sub.id) ? styles.level2TagActive : {}),
+                            }}
                             onClick={() => handleLevel2Change(sub.id)}
                         >
                             {sub.name}
-                        </button>
+                        </div>
                     ))}
                 </div>
             )}
 
             {/* ========== 素材网格 ========== */}
             {loading ? (
-                <div className="home-loading" aria-label="正在加载素材">
+                <div style={{ textAlign: 'center', padding: 80 }}>
                     <Spin size="large" />
                 </div>
             ) : materials.length === 0 ? (
-                <div className="home-empty">
-                    <div className="home-empty-mark" aria-hidden="true"><span /></div>
-                    <span className="home-empty-index">NO MATERIALS / 00</span>
-                    <h3>{searchQuery ? '没有找到相关素材' : categories.length ? '这一分类暂无素材' : '素材即将上线'}</h3>
-                    <p>{searchQuery ? '试试更短的关键词或浏览其他分类' : categories.length ? '可以先看看其他分类，新的内容会在这里出现' : '分类和素材准备好后，会在这里展示'}</p>
+                <div style={{ padding: 80 }}>
+                    <Empty description="暂无素材" />
                 </div>
             ) : (
-                <div className="home-grid">
+                <div style={styles.grid}>
                     {materials.map((m, index) => (
-                        <button type="button" key={m.id} className="home-material" style={{ '--i': index }} onClick={() => openPreview(index)} aria-label={`预览${m.title}`}>
+                        <div key={m.id} style={styles.gridItem} onClick={() => openPreview(index)}>
                             {/* 图片容器 */}
-                            <div className="home-material-image" style={styles.imageWrapper}>
+                            <div style={styles.imageWrapper}>
                                 {/* 缩略图分发：图片/视频渲染 img，音频/其他渲染居中图标 */}
                                 {m.type === MATERIAL_TYPE_AUDIO ? (
-                                    <div style={{ ...styles.image, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eaf2ff' }}>
-                                        <CustomerServiceOutlined style={{ fontSize: 64, color: '#1554c6' }} />
+                                    <div style={{ ...styles.image, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff7e6' }}>
+                                        <CustomerServiceOutlined style={{ fontSize: 64, color: '#fa8c16' }} />
                                     </div>
                                 ) : m.type === MATERIAL_TYPE_OTHER ? (
                                     <div style={{ ...styles.image, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
@@ -291,8 +266,8 @@ const Home = () => {
                                 </div>
                             </div>
                             {/* 标题 */}
-                            <div className="home-material-title">{m.title}</div>
-                        </button>
+                            <div style={styles.itemTitle}>{m.title}</div>
+                        </div>
                     ))}
                 </div>
             )}
@@ -318,7 +293,7 @@ const Home = () => {
                 footer={null}
                 width={800}
                 centered
-                destroyOnHidden
+                destroyOnClose
                 title={currentPreviewMaterial?.title || '素材预览'}
                 styles={{ body: { padding: '20px 24px 16px' } }}
             >
@@ -328,9 +303,9 @@ const Home = () => {
                         <div style={styles.previewArea}>
                             {/* 左箭头导航 */}
                             {materials.length > 1 && (
-                                <button type="button" aria-label="上一项素材" style={{ ...styles.navArrow, left: 8 }} onClick={goToPrev}>
+                                <div style={{ ...styles.navArrow, left: 8 }} onClick={goToPrev}>
                                     <LeftOutlined style={{ fontSize: 22, color: '#fff' }} />
-                                </button>
+                                </div>
                             )}
 
                             {isVideoMaterial(currentPreviewMaterial) ? (
@@ -368,8 +343,8 @@ const Home = () => {
                                                 timeEl.textContent = `${fmt(v.currentTime)} / ${fmt(v.duration)}`;
                                             }
                                         }}
-                                        onPlay={() => setIsPreviewPlaying(true)}
-                                        onPause={() => setIsPreviewPlaying(false)}
+                                        onPlay={() => { const b = document.getElementById('custom-play-btn'); if (b) b.textContent = '⏸'; }}
+                                        onPause={() => { const b = document.getElementById('custom-play-btn'); if (b) b.textContent = '▶'; }}
                                     >
                                         您的浏览器不支持视频播放
                                     </video>
@@ -396,11 +371,9 @@ const Home = () => {
                                     }}>
                                         <button
                                             id="custom-play-btn"
-                                            type="button"
-                                            aria-label={isPreviewPlaying ? '暂停预览' : '播放预览'}
                                             onClick={() => { const v = document.getElementById('preview-video'); if (v) v.paused ? v.play() : v.pause(); }}
                                             style={{ background: 'none', border: 'none', color: '#fff', fontSize: 18, cursor: 'pointer', width: 28 }}
-                                        >{isPreviewPlaying ? <PauseOutlined /> : <CaretRightOutlined />}</button>
+                                        >▶</button>
                                         <input
                                             id="custom-progress"
                                             type="range" min="0" max="100" defaultValue="0"
@@ -417,17 +390,16 @@ const Home = () => {
                                             style={{ flex: 1, height: 4, cursor: 'pointer', accentColor: '#1890ff' }}
                                         />
                                         <span id="custom-time" style={{ color: '#fff', fontSize: 12, minWidth: 80, textAlign: 'center' }}>0:00 / 0:00</span>
-                                        <button type="button"
+                                        <button
                                             onClick={() => { const v = document.getElementById('preview-video'); if (v) v.muted = !v.muted; }}
                                             style={{ background: 'none', border: 'none', color: '#fff', fontSize: 16, cursor: 'pointer' }}
-                                            aria-label="切换静音"
-                                        ><SoundOutlined /></button>
+                                        >🔊</button>
                                     </div>
                                 </div>
                             ) : currentPreviewMaterial.type === MATERIAL_TYPE_AUDIO ? (
                                 /* ---- 音频播放器 ---- */
-                                <div style={{ ...styles.imagePreviewContainer, width: '100%', minHeight: 400, background: '#eaf2ff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
-                                    <CustomerServiceOutlined style={{ fontSize: 100, color: '#1554c6' }} />
+                                <div style={{ ...styles.imagePreviewContainer, width: '100%', minHeight: 400, background: '#fff7e6', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
+                                    <CustomerServiceOutlined style={{ fontSize: 100, color: '#fa8c16' }} />
                                     <audio
                                         controls
                                         src={`/api/materials/${currentPreviewMaterial.id}/stream`}
@@ -461,9 +433,9 @@ const Home = () => {
 
                             {/* 右箭头导航 */}
                             {materials.length > 1 && (
-                                <button type="button" aria-label="下一项素材" style={{ ...styles.navArrow, right: 8 }} onClick={goToNext}>
+                                <div style={{ ...styles.navArrow, right: 8 }} onClick={goToNext}>
                                     <RightOutlined style={{ fontSize: 22, color: '#fff' }} />
-                                </button>
+                                </div>
                             )}
                         </div>
 
@@ -494,25 +466,92 @@ const Home = () => {
                                 </Button>
                             )}
                             <div style={styles.downloadTip}>
-                                * 提示：下载文件一般在浏览器右上角查看。<strong style={{ color: '#1554c6' }}>付费素材在首次下载后的7天内可以免费重复下载。</strong>
+                                * 提示：下载文件一般在浏览器右上角查看。<strong style={{ color: '#52c41a' }}>付费素材在首次下载后的7天内可以免费重复下载。</strong>
                             </div>
                         </div>
                     </div>
                 )}
             </Modal>
-            </section>
         </div>
     );
 };
 
 /* ==================== 样式常量 ==================== */
 const styles = {
+    /* 一级分类导航栏 - 文字链接形式，间距充裕 */
+    level1Bar: {
+        display: 'flex',
+        gap: 8,
+        borderBottom: '2px solid #eee',
+        marginBottom: 20,
+        flexWrap: 'wrap',
+        alignItems: 'center',
+    },
+    level1Tab: {
+        padding: '12px 16px',
+        cursor: 'pointer',
+        fontSize: 16,
+        fontWeight: 500,
+        color: '#333',
+        borderBottom: '3px solid transparent',
+        transition: 'all 0.2s',
+        whiteSpace: 'nowrap',
+    },
+    level1TabActive: {
+        color: '#e8601c',  // 参考站使用橙色高亮
+        borderBottom: '3px solid #e8601c',
+        fontWeight: 600,
+    },
+
+    /* 二级分类标签行 - pill 胶囊按钮形式 */
+    level2Bar: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 12,
+        marginBottom: 24,
+        padding: '8px 0',
+        alignItems: 'center',
+    },
+    level2Tag: {
+        padding: '6px 22px',
+        borderRadius: 20,
+        border: '1px solid #d9d9d9',
+        cursor: 'pointer',
+        fontSize: 14,
+        color: '#555',
+        background: '#fff',
+        transition: 'all 0.2s',
+        userSelect: 'none',
+    },
+    level2TagActive: {
+        background: '#1890ff',
+        color: '#fff',
+        border: '1px solid #1890ff',
+    },
+
+    /* 素材 5 列网格 - 与参考站一致 */
+    grid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: 20,
+        padding: '10px 0',
+    },
+    /* 单个素材卡片 */
+    gridItem: {
+        cursor: 'pointer',
+        transition: 'transform 0.15s, box-shadow 0.15s',
+        textAlign: 'center',
+        borderRadius: 8,
+        overflow: 'hidden',
+        background: '#fff',
+        border: '1px solid #e8e8e8',
+    },
     /* 图片容器 - 4:3 宽高比 */
     imageWrapper: {
         position: 'relative',
         width: '100%',
         paddingBottom: '75%',
-        background: '#f5f8fd',
+        background: '#fafafa',
         overflow: 'hidden',
     },
     /* 缩略图 */
@@ -522,14 +561,15 @@ const styles = {
         left: 0,
         width: '100%',
         height: '100%',
-        objectFit: 'cover',
+        objectFit: 'contain',
+        padding: 6,
     },
     /* 版权角标 */
     copyrightBadge: {
         position: 'absolute',
         top: 8,
         left: 8,
-        background: '#101b2d',
+        background: '#ff4d4f',
         color: '#fff',
         fontSize: 12,
         padding: '2px 10px',
@@ -542,7 +582,7 @@ const styles = {
         position: 'absolute',
         top: 8,
         right: 8,
-        background: '#1554c6',
+        background: '#1890ff',
         color: '#fff',
         fontSize: 11,
         padding: '2px 8px',
@@ -550,6 +590,16 @@ const styles = {
         fontWeight: 600,
         zIndex: 1,
     },
+    /* 素材标题 */
+    itemTitle: {
+        padding: '10px 8px 12px',
+        fontSize: 14,
+        color: '#333',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+    },
+
     /* ==================== 预览弹窗样式 ==================== */
     modalContent: {
         display: 'flex',
@@ -565,7 +615,7 @@ const styles = {
         alignItems: 'center',
         minHeight: 300,
         background: '#f5f5f5',
-        borderRadius: 2,
+        borderRadius: 8,
         overflow: 'hidden',
     },
     /* 预览大图 */
@@ -653,7 +703,7 @@ const styles = {
         height: 44,
         fontSize: 16,
         borderRadius: 22,
-        background: '#1554c6',
+        background: '#1890ff',
     },
     /* 登录按钮 */
     loginBtn: {
@@ -661,8 +711,8 @@ const styles = {
         height: 44,
         fontSize: 16,
         borderRadius: 22,
-        background: '#1554c6',
-        borderColor: '#1554c6',
+        background: '#ff8c00',
+        borderColor: '#ff8c00',
     },
     /* 底部提示 */
     downloadTip: {

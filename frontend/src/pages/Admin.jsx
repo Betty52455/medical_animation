@@ -36,27 +36,23 @@ const Admin = () => {
     }, []);
 
     return (
-        <main className="admin-page">
-            <header className="admin-header">
-                <div>
-                    <span className="admin-kicker">SCIENCE MATERIALS / STUDIO</span>
-                    <h1>管理工作台</h1>
-                    <p>管理素材、分类与网站运营</p>
-                </div>
+        <div style={{ padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h2 style={{ margin: 0 }}>趣味科普网 · 管理后台</h2>
                 <Button
+                    type="primary"
+                    danger
                     icon={<LogoutOutlined />}
                     onClick={() => {
                         localStorage.removeItem('token');
-                        localStorage.removeItem('username');
-                        localStorage.removeItem('role');
                         message.success('已退出登录');
                         window.location.href = '/admin-login';
                     }}
                 >
                     退出登录
                 </Button>
-            </header>
-            <Tabs className="admin-tabs" defaultActiveKey="1" items={[
+            </div>
+            <Tabs defaultActiveKey="1" items={[
                 { label: '分类管理', key: '2', children: <CreateCategoryForm onSuccess={fetchCategories} categories={categories} /> },
                 { label: '上传素材', key: '1', children: <UploadMaterialForm categories={categories} /> },
                 { label: '素材管理', key: '6', children: <MaterialManagement categories={categories} /> },
@@ -66,7 +62,7 @@ const Admin = () => {
                 { label: '数据统计', key: '7', children: <StatsPanel /> },
                 { label: '操作手册', key: '8', children: <UserManual /> },
             ]} />
-        </main>
+        </div>
     );
 };
 
